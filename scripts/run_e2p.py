@@ -3,7 +3,7 @@
 
 import argparse
 
-from personalize.data import create_demo_dataset
+from personalize.datasets import create_demo_dataset
 from personalize.models import E2PLLM, TextBaselineLLM
 
 

@@ -6,7 +6,7 @@ import argparse
 import torch
 from torch.optim import AdamW
 
-from personalize.data import PersonalizationDataset
+from personalize.datasets import PersonalizationDataset
 from personalize.models import E2PLLM
 
 
@@ -263,7 +263,7 @@ def main():
         },
     ]
 
-    from personalize.data import UserContext
+    from personalize.datasets import UserContext
 
     for i, tc in enumerate(test_cases):
         print(f"\n--- Test {i + 1} ---")

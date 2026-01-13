@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from personalize.data import UserContext, create_demo_dataset
+from personalize.datasets import UserContext, create_demo_dataset
 from personalize.models import TextBaselineLLM
 
 
