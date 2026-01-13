@@ -50,6 +50,11 @@ def main():
         action="store_true",
         help="Compare with text baseline",
     )
+    parser.add_argument(
+        "--projector-path",
+        type=str,
+        help="Path to trained projector weights",
+    )
     args = parser.parse_args()
 
     print("=" * 60)
@@ -70,6 +75,11 @@ def main():
     e2p.load()
 
     print(f"\nE2P projector parameters: {e2p.get_num_trainable_parameters():,}")
+    
+    if args.projector_path:
+        print(f"Loading projector weights from {args.projector_path}")
+        e2p.load_projector(args.projector_path)
+        
     print("Model loaded.\n")
 
     # Optionally load baseline for comparison

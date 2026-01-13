@@ -94,7 +94,7 @@ class E2PLLM(PersonalizedLLM):
         # Get LLM embedding dimension
         llm_embed_dim = self.model.get_input_embeddings().weight.shape[1]
 
-        # Initialize prefix projector
+        # Initialize prefix projector (keep in float32 for training stability)
         self.prefix_projector = PrefixProjector(
             user_embedding_dim=self.user_encoder.embedding_dim,
             llm_embedding_dim=llm_embed_dim,
@@ -265,15 +265,20 @@ class E2PLLM(PersonalizedLLM):
         full_text = prompt + target
         prepared = self._prepare_inputs_with_prefix(full_text, user_context)
 
-        # Tokenize to get token ids for labels
+        # Tokenize with same settings as _prepare_inputs_with_prefix
+        max_len = self.model.config.max_position_embeddings - self.num_prefix_tokens - 256
         full_ids = self.tokenizer(
             full_text,
             return_tensors="pt",
+            truncation=True,
+            max_length=max_len,
         )["input_ids"].to(self.device)
 
         prompt_ids = self.tokenizer(
             prompt,
             return_tensors="pt",
+            truncation=True,
+            max_length=max_len,
         )["input_ids"]
         prompt_len = prompt_ids.shape[1]
 
@@ -292,6 +297,25 @@ class E2PLLM(PersonalizedLLM):
         else:
             labels = full_ids.clone()
             labels[:, :prompt_len] = -100
+
+        # Verify sequence lengths match
+        expected_len = prepared["inputs_embeds"].shape[1]
+        if labels.shape[1] != expected_len:
+            # Truncate or pad labels to match
+            if labels.shape[1] > expected_len:
+                labels = labels[:, :expected_len]
+            else:
+                pad_len = expected_len - labels.shape[1]
+                labels = torch.cat([
+                    labels,
+                    torch.full((1, pad_len), -100, dtype=labels.dtype, device=self.device)
+                ], dim=1)
+
+        # Ensure we have at least one non-masked label token
+        num_valid_labels = (labels != -100).sum().item()
+        if num_valid_labels == 0:
+            # No valid labels - skip this sample
+            return torch.tensor(0.0, device=self.device, requires_grad=True)
 
         # Forward pass
         outputs = self.model(

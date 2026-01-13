@@ -2,6 +2,7 @@
 
 from .base import GenerationOutput, PersonalizedLLM
 from .e2p import E2PLLM
+from .persoma_llm import PERSOMALLM
 from .text_baseline import TextBaselineLLM
 
 __all__ = [
@@ -9,4 +10,5 @@ __all__ = [
     "GenerationOutput",
     "TextBaselineLLM",
     "E2PLLM",
+    "PERSOMALLM",
 ]

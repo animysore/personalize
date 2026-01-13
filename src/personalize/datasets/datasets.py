@@ -58,74 +58,156 @@ class PersonalizationDataset:
 
 
 def create_demo_dataset() -> PersonalizationDataset:
-    """Create a small demo dataset for testing."""
+    """Create a small demo dataset for testing and training."""
     dataset = PersonalizationDataset()
 
-    # Movie recommendation example
+    # Movie recommendations
     dataset.add_sample(
-        prompt="Recommend a movie for me to watch tonight.",
+        prompt="Recommend a movie for me.",
         user={
             "user_id": "user_001",
             "profile": {
-                "name": "Alex",
-                "preferences": {
-                    "favorite_genres": "sci-fi, thriller",
-                    "dislikes": "horror, romance",
-                    "preferred_length": "under 2 hours",
-                },
+                "preferences": {"genres": "sci-fi, thriller", "dislikes": "horror, romance"},
             },
             "history": [
-                {"content": "Watched and loved Inception", "type": "watch"},
-                {"content": "Watched and loved The Matrix", "type": "watch"},
-                {"content": "Didn't finish The Notebook", "type": "watch"},
-                {"content": "Rated Interstellar 5 stars", "type": "rating"},
+                "Loved Inception",
+                "Loved The Matrix",
+                "Loved Interstellar",
             ],
         },
-        reference="Based on your love for sci-fi thrillers like Inception and The Matrix, "
-        "I'd recommend Arrival or Ex Machina.",
+        reference="Based on your love for sci-fi, I recommend Arrival - it's a thoughtful sci-fi thriller you'll enjoy.",
     )
 
-    # Writing style example
     dataset.add_sample(
-        prompt="Write a short product description for wireless earbuds.",
+        prompt="What movie should I watch?",
         user={
             "user_id": "user_002",
             "profile": {
-                "preferences": {
-                    "writing_style": "casual and friendly",
-                    "tone": "enthusiastic",
-                    "avoid": "technical jargon",
-                },
+                "preferences": {"genres": "comedy, animation", "mood": "lighthearted"},
             },
             "history": [
-                {"content": "Previous writing used lots of exclamation marks", "type": "style"},
-                {"content": "Prefers short sentences", "type": "style"},
+                "Enjoyed Pixar movies",
+                "Liked The Grand Budapest Hotel",
             ],
         },
+        reference="For a fun, lighthearted watch, try Coco or Inside Out - both are heartwarming animated films.",
     )
 
-    # Coding assistant example
+    # Writing style
     dataset.add_sample(
-        prompt="Explain how to sort a list in Python.",
+        prompt="Write a greeting for my website.",
         user={
             "user_id": "user_003",
             "profile": {
-                "attributes": {
-                    "experience_level": "beginner",
-                    "background": "coming from JavaScript",
-                },
-                "preferences": {
-                    "explanation_style": "with examples",
-                    "detail_level": "thorough",
-                },
+                "preferences": {"style": "casual and friendly", "tone": "warm"},
             },
         },
+        reference="Hey there! Welcome to our little corner of the internet. We're so glad you stopped by!",
     )
 
-    # No context example (baseline comparison)
     dataset.add_sample(
-        prompt="What's the capital of France?",
-        user={"user_id": "user_004"},
+        prompt="Write a greeting for my website.",
+        user={
+            "user_id": "user_004",
+            "profile": {
+                "preferences": {"style": "professional", "tone": "formal"},
+            },
+        },
+        reference="Welcome to our platform. We are committed to providing you with exceptional service and solutions.",
+    )
+
+    # Technical explanations
+    dataset.add_sample(
+        prompt="Explain variables.",
+        user={
+            "user_id": "user_005",
+            "profile": {
+                "attributes": {"level": "beginner", "background": "no coding experience"},
+            },
+        },
+        reference="Variables are like labeled boxes where you store information. You give the box a name, put something in it, and can look at or change what's inside later.",
+    )
+
+    dataset.add_sample(
+        prompt="Explain variables.",
+        user={
+            "user_id": "user_006",
+            "profile": {
+                "attributes": {"level": "experienced", "background": "senior developer"},
+            },
+        },
+        reference="Variables are named memory locations that hold references to objects. In Python, they're dynamically typed and use reference semantics.",
+    )
+
+    # --- New Samples ---
+
+    dataset.add_sample(
+        prompt="Recommend a movie for me.",
+        user={
+            "user_id": "user_007",
+            "profile": {
+                "preferences": {"genres": "historical drama, biography", "dislikes": "fantasy"},
+            },
+            "history": ["Loved The King's Speech", "Liked Schindler's List"],
+        },
+        reference="Given your interest in historical dramas, you must watch Oppenheimer - it's a gripping biographical masterpiece.",
+    )
+
+    dataset.add_sample(
+        prompt="What should I watch tonight?",
+        user={
+            "user_id": "user_008",
+            "profile": {
+                "preferences": {"genres": "action, adventure", "pace": "fast"},
+            },
+            "history": ["Loved Mad Max: Fury Road", "Liked John Wick"],
+        },
+        reference="If you want high-octane action, Mission: Impossible - Fallout is unmatched in its intensity and stunts.",
+    )
+
+    dataset.add_sample(
+        prompt="Write a greeting for my website.",
+        user={
+            "user_id": "user_009",
+            "profile": {
+                "preferences": {"style": "poetic and flowery", "tone": "elegant"},
+            },
+        },
+        reference="Greetings, traveler. May your journey through our digital garden be filled with wonder and discovery.",
+    )
+
+    dataset.add_sample(
+        prompt="Write a greeting.",
+        user={
+            "user_id": "user_010",
+            "profile": {
+                "preferences": {"style": "concise and direct", "tone": "efficient"},
+            },
+        },
+        reference="Welcome. Browse our services below.",
+    )
+
+    dataset.add_sample(
+        prompt="Explain neural networks.",
+        user={
+            "user_id": "user_011",
+            "profile": {
+                "attributes": {"level": "expert", "background": "data scientist"},
+            },
+            "history": ["Reads research papers", "Implements transformers"],
+        },
+        reference="Neural networks are function approximators composed of stacked affine transformations followed by non-linearities, optimized via backpropagation.",
+    )
+
+    dataset.add_sample(
+        prompt="Explain neural networks.",
+        user={
+            "user_id": "user_012",
+            "profile": {
+                "attributes": {"level": "child", "age": "5"},
+            },
+        },
+        reference="A neural network is like a giant brain made of math that learns to recognize pictures of cats by looking at thousands of them!",
     )
 
     return dataset

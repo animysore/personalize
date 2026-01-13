@@ -6,162 +6,8 @@ import argparse
 import torch
 from torch.optim import AdamW
 
-from personalize.datasets import PersonalizationDataset
+from personalize.datasets import PersonalizationDataset, UserContext, create_demo_dataset
 from personalize.models import E2PLLM
-
-
-def create_training_dataset() -> PersonalizationDataset:
-    """Create a small training dataset with reference outputs."""
-    dataset = PersonalizationDataset()
-
-    # Movie recommendations
-    dataset.add_sample(
-        prompt="Recommend a movie for me.",
-        user={
-            "user_id": "user_001",
-            "profile": {
-                "preferences": {"genres": "sci-fi, thriller", "dislikes": "horror, romance"},
-            },
-            "history": [
-                "Loved Inception",
-                "Loved The Matrix",
-                "Loved Interstellar",
-            ],
-        },
-        reference="Based on your love for sci-fi, I recommend Arrival - it's a thoughtful sci-fi thriller you'll enjoy.",
-    )
-
-    dataset.add_sample(
-        prompt="What movie should I watch?",
-        user={
-            "user_id": "user_002",
-            "profile": {
-                "preferences": {"genres": "comedy, animation", "mood": "lighthearted"},
-            },
-            "history": [
-                "Enjoyed Pixar movies",
-                "Liked The Grand Budapest Hotel",
-            ],
-        },
-        reference="For a fun, lighthearted watch, try Coco or Inside Out - both are heartwarming animated films.",
-    )
-
-    # Writing style
-    dataset.add_sample(
-        prompt="Write a greeting for my website.",
-        user={
-            "user_id": "user_003",
-            "profile": {
-                "preferences": {"style": "casual and friendly", "tone": "warm"},
-            },
-        },
-        reference="Hey there! Welcome to our little corner of the internet. We're so glad you stopped by!",
-    )
-
-    dataset.add_sample(
-        prompt="Write a greeting for my website.",
-        user={
-            "user_id": "user_004",
-            "profile": {
-                "preferences": {"style": "professional", "tone": "formal"},
-            },
-        },
-        reference="Welcome to our platform. We are committed to providing you with exceptional service and solutions.",
-    )
-
-    # Technical explanations
-    dataset.add_sample(
-        prompt="Explain variables.",
-        user={
-            "user_id": "user_005",
-            "profile": {
-                "attributes": {"level": "beginner", "background": "no coding experience"},
-            },
-        },
-        reference="Variables are like labeled boxes where you store information. You give the box a name, put something in it, and can look at or change what's inside later.",
-    )
-
-    dataset.add_sample(
-        prompt="Explain variables.",
-        user={
-            "user_id": "user_006",
-            "profile": {
-                "attributes": {"level": "experienced", "background": "senior developer"},
-            },
-        },
-        reference="Variables are named memory locations that hold references to objects. In Python, they're dynamically typed and use reference semantics.",
-    )
-
-    dataset.add_sample(
-        prompt="Recommend a movie for me.",
-        user={
-            "user_id": "user_007",
-            "profile": {
-                "preferences": {"genres": "historical drama, biography", "dislikes": "fantasy"},
-            },
-            "history": ["Loved The King's Speech", "Liked Schindler's List"],
-        },
-        reference="Given your interest in historical dramas, you must watch Oppenheimer - it's a gripping biographical masterpiece.",
-    )
-
-    dataset.add_sample(
-        prompt="What should I watch tonight?",
-        user={
-            "user_id": "user_008",
-            "profile": {
-                "preferences": {"genres": "action, adventure", "pace": "fast"},
-            },
-            "history": ["Loved Mad Max: Fury Road", "Liked John Wick"],
-        },
-        reference="If you want high-octane action, Mission: Impossible - Fallout is unmatched in its intensity and stunts.",
-    )
-
-    dataset.add_sample(
-        prompt="Write a greeting for my website.",
-        user={
-            "user_id": "user_009",
-            "profile": {
-                "preferences": {"style": "poetic and flowery", "tone": "elegant"},
-            },
-        },
-        reference="Greetings, traveler. May your journey through our digital garden be filled with wonder and discovery.",
-    )
-
-    dataset.add_sample(
-        prompt="Write a greeting.",
-        user={
-            "user_id": "user_010",
-            "profile": {
-                "preferences": {"style": "concise and direct", "tone": "efficient"},
-            },
-        },
-        reference="Welcome. Browse our services below.",
-    )
-
-    dataset.add_sample(
-        prompt="Explain neural networks.",
-        user={
-            "user_id": "user_011",
-            "profile": {
-                "attributes": {"level": "expert", "background": "data scientist"},
-            },
-            "history": ["Reads research papers", "Implements transformers"],
-        },
-        reference="Neural networks are function approximators composed of stacked affine transformations followed by non-linearities, optimized via backpropagation.",
-    )
-
-    dataset.add_sample(
-        prompt="Explain neural networks.",
-        user={
-            "user_id": "user_012",
-            "profile": {
-                "attributes": {"level": "child", "age": "5"},
-            },
-        },
-        reference="A neural network is like a giant brain made of math that learns to recognize pictures of cats by looking at thousands of them!",
-    )
-
-    return dataset
 
 
 def main():
@@ -172,6 +18,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--device", type=str, default=None)
+    parser.add_argument("--save-path", type=str, default="e2p_projector.pt", help="Path to save trained projector")
     args = parser.parse_args()
 
     print("=" * 60)
@@ -190,8 +37,8 @@ def main():
 
     print(f"Trainable parameters: {e2p.get_num_trainable_parameters():,}")
 
-    # Create dataset
-    dataset = create_training_dataset()
+    # Create dataset - using the expanded demo dataset
+    dataset = create_demo_dataset()
     print(f"Training samples: {len(dataset)}")
 
     # Setup optimizer
@@ -233,6 +80,11 @@ def main():
 
     print("-" * 60)
     print("Training complete!\n")
+    
+    # Save model
+    print(f"Saving projector to {args.save_path}...")
+    e2p.save_projector(args.save_path)
+    print("Saved.")
 
     # Test generation
     print("=" * 60)
@@ -262,8 +114,6 @@ def main():
             },
         },
     ]
-
-    from personalize.datasets import UserContext
 
     for i, tc in enumerate(test_cases):
         print(f"\n--- Test {i + 1} ---")

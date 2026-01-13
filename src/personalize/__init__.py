@@ -2,7 +2,7 @@
 
 __version__ = "0.1.0"
 
-from .data import UserContext, UserHistory, UserProfile, create_demo_dataset
+from .datasets import UserContext, UserHistory, UserProfile, create_demo_dataset
 from .encoders import PrefixProjector, SentenceTransformerEncoder, UserEncoder
 from .models import E2PLLM, GenerationOutput, PersonalizedLLM, TextBaselineLLM
 
